@@ -23,6 +23,8 @@ async def create_item(item: Item):
         dict: json response with the item created
     """
     new_item = DB_grocery.item.insert_one(dict(item))
+    # if not new_item:
+    #     raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="The item that you are trying to created may be meassing some fields or the date inclued on the field is not the right type.")
     return itemEntity(DB_grocery.item.find_one({"_id": new_item.inserted_id}))
     
 @item.get('/', status_code=status.HTTP_200_OK)
@@ -34,7 +36,7 @@ async def get_all_items():
     """
     items = list(DB_grocery.item.find())
     if len(items) == 0:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="This list is empity! Try add some items in the list.")
+        raise HTTPException(status_code=status.HT, detail="This list is empity! Try add some items in the list.")
     return itemsEntity(DB_grocery.item.find())
 
 @item.get('/{id}', status_code=status.HTTP_200_OK)
@@ -62,6 +64,10 @@ async def update_item(id, item: Item):
     Returns:
         _type_: _description_
     """
+    selected_item = DB_grocery.item.find_one({'_id': ObjectId(id)})
+    
+    if not selected_item:
+         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"The list elemento of id: {id}, doesn't exist!") 
     DB_grocery.item.find_one_and_update(
         {'_id': ObjectId(id)},{
         '$set':dict(item)
@@ -70,7 +76,11 @@ async def update_item(id, item: Item):
     return itemEntity(DB_grocery.item.find_one({'_id': ObjectId(id)}))
 
 @item.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_item(id, item:Item):
+async def delete_item(id):
     """Delete a specific a item from the grocery list
     """
+    selected_item = DB_grocery.item.find_one({'_id': ObjectId(id)})
+    
+    if not selected_item:
+         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"The list elemento of id: {id}, doesn't exist!") 
     return itemEntity(DB_grocery.item.find_one_and_delete({'_id': ObjectId(id)}))
