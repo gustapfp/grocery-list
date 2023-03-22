@@ -1,5 +1,6 @@
 from fastapi import FastAPI
-from routes.item import item
+from routes import item, user
+# from routes.user import user
 
 tags_metadata = [
         {
@@ -10,4 +11,5 @@ tags_metadata = [
 
 app = FastAPI(openapi_tags=tags_metadata)
 
-app.include_router(item)
+app.include_router(item.item)
+app.include_router(user.user)
